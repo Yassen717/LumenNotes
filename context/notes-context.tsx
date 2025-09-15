@@ -3,6 +3,7 @@
  */
 
 import React, { createContext, useCallback, useContext, useReducer } from 'react';
+import { NotesService } from '../services';
 import { CreateNoteInput, Note, UpdateNoteInput } from '../types';
 
 /**
@@ -191,35 +192,110 @@ const NotesContext = createContext<NotesContextType | undefined>(undefined);
 export function NotesProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(notesReducer, initialState);
 
-  // We'll implement these functions when we create the notes service
+  // We'll implement these functions with the notes service
   const createNote = useCallback(async (input: CreateNoteInput): Promise<Note> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.createNote(input);
+      
+      if (result.success && result.data) {
+        dispatch({ type: 'ADD_NOTE', payload: result.data });
+        return result.data;
+      } else {
+        throw new Error(result.error || 'Failed to create note');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create note';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
   }, []);
 
   const updateNote = useCallback(async (input: UpdateNoteInput): Promise<Note> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.updateNote(input);
+      
+      if (result.success && result.data) {
+        dispatch({ type: 'UPDATE_NOTE', payload: result.data });
+        return result.data;
+      } else {
+        throw new Error(result.error || 'Failed to update note');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update note';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
   }, []);
 
   const deleteNote = useCallback(async (id: string): Promise<void> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.deleteNote(id);
+      
+      if (result.success) {
+        dispatch({ type: 'DELETE_NOTE', payload: id });
+      } else {
+        throw new Error(result.error || 'Failed to delete note');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete note';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
   }, []);
 
   const restoreNote = useCallback(async (id: string): Promise<void> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.restoreNote(id);
+      
+      if (result.success) {
+        dispatch({ type: 'RESTORE_NOTE', payload: id });
+      } else {
+        throw new Error(result.error || 'Failed to restore note');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to restore note';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
   }, []);
 
   const togglePinNote = useCallback(async (id: string): Promise<void> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.togglePinNote(id);
+      
+      if (result.success) {
+        dispatch({ type: 'TOGGLE_PIN_NOTE', payload: id });
+      } else {
+        throw new Error(result.error || 'Failed to toggle pin status');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to toggle pin status';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
   }, []);
 
   const duplicateNote = useCallback(async (id: string): Promise<Note> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.duplicateNote(id);
+      
+      if (result.success && result.data) {
+        dispatch({ type: 'ADD_NOTE', payload: result.data });
+        return result.data;
+      } else {
+        throw new Error(result.error || 'Failed to duplicate note');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to duplicate note';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
   }, []);
 
   // Search and filtering functions
@@ -267,14 +343,29 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
 
   // Data operations
   const loadNotes = useCallback(async (): Promise<void> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+      
+      const result = await NotesService.loadNotes();
+      
+      if (result.success && result.data) {
+        dispatch({ type: 'SET_NOTES', payload: result.data });
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: result.data });
+      } else {
+        throw new Error(result.error || 'Failed to load notes');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load notes';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
   }, []);
 
   const refreshNotes = useCallback(async (): Promise<void> => {
-    // TODO: Implement with notes service
-    throw new Error('Not implemented yet');
-  }, []);
+    await loadNotes();
+  }, [loadNotes]);
 
   // Utility functions
   const getNoteById = useCallback((id: string): Note | undefined => {
@@ -310,6 +401,11 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       tags: getTags().length,
     };
   }, [state.notes, getCategories, getTags]);
+
+  // Load notes on component mount
+  React.useEffect(() => {
+    loadNotes().catch(console.error);
+  }, [loadNotes]);
 
   // Context value
   const contextValue: NotesContextType = {

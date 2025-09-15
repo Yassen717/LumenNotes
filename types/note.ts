@@ -55,6 +55,7 @@ export interface UpdateNoteInput {
   tags?: string[];
   color?: string;
   isPinned?: boolean;
+  isDeleted?: boolean;
 }
 
 /**
