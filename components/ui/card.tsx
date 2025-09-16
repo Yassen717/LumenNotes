@@ -3,13 +3,13 @@
  */
 
 import React from 'react';
-import { TouchableOpacity, View, ViewStyle } from 'react-native';
+import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { useColors } from '../../context';
 
 interface CardProps {
   children: React.ReactNode;
   onPress?: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   padding?: number;
   margin?: number;
   shadow?: boolean;

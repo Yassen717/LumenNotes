@@ -1,98 +1,177 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { FAB } from '@/components/navigation/fab-button';
+import { NoteCard } from '@/components/notes/note-card';
+import { SearchBar } from '@/components/notes/search-bar';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { useColors, useNotes } from '@/context';
+import { Note } from '@/types';
 
-export default function HomeScreen() {
+export default function NotesListScreen() {
+  const {
+    filteredNotes,
+    loading,
+    error,
+    searchNotes,
+    clearFilters,
+    refreshNotes,
+  } = useNotes();
+  const colors = useColors();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshNotes();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshNotes]);
+
+  const handleNotePress = useCallback((note: Note) => {
+    // router.push(`/note/${note.id}`);
+    console.log('Note pressed:', note.title);
+  }, []);
+
+  const handleNoteLongPress = useCallback((note: Note) => {
+    // TODO: Show context menu
+    console.log('Long press on note:', note.title);
+  }, []);
+
+  const handleCreateNote = useCallback(() => {
+    // router.push('/note/create');
+    console.log('Create new note');
+  }, []);
+
+  const handleSearch = useCallback((query: string) => {
+    searchNotes(query);
+  }, [searchNotes]);
+
+  const handleClearSearch = useCallback(() => {
+    clearFilters();
+  }, [clearFilters]);
+
+  const renderNote = useCallback(({ item }: { item: Note }) => (
+    <NoteCard
+      note={item}
+      onPress={() => handleNotePress(item)}
+      onLongPress={() => handleNoteLongPress(item)}
+      style={styles.noteCard}
+    />
+  ), [handleNotePress, handleNoteLongPress]);
+
+  const renderEmptyState = () => (
+    <ThemedView style={styles.emptyState}>
+      <ThemedText style={styles.emptyStateTitle}>No notes yet</ThemedText>
+      <ThemedText style={styles.emptyStateSubtitle}>
+        Tap the + button to create your first note
+      </ThemedText>
+    </ThemedView>
+  );
+
+  if (error) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.errorState}>
+          <ThemedText style={styles.errorTitle}>Error loading notes</ThemedText>
+          <ThemedText style={styles.errorSubtitle}>{error}</ThemedText>
+        </ThemedView>
+      </ThemedView>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <ThemedView style={styles.container}>
+      <View style={styles.header}>
+        <ThemedText type="title" style={styles.headerTitle}>
+          Notes
+        </ThemedText>
+        <SearchBar
+          onSearch={handleSearch}
+          onClear={handleClearSearch}
+          style={styles.searchBar}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <FlatList
+        data={filteredNotes.filter(note => !note.isDeleted)}
+        renderItem={renderNote}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+        ListEmptyComponent={renderEmptyState}
+      />
+
+      <FAB onPress={handleCreateNote} testID="create-note-fab" />
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  headerTitle: {
+    marginBottom: 16,
+  },
+  searchBar: {
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  listContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 100, // Space for FAB
+  },
+  noteCard: {
+    marginBottom: 12,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 64,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
+  },
+  errorState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 64,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+    color: 'red',
+  },
+  errorSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
   },
 });

@@ -4,4 +4,4 @@
 
 // Note components
 export * from './note-card';
-export * from './search-bar';"]}]
+export * from './search-bar';
