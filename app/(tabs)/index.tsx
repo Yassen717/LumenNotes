@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
@@ -31,8 +32,7 @@ export default function NotesListScreen() {
   }, [refreshNotes]);
 
   const handleNotePress = useCallback((note: Note) => {
-    // router.push(`/note/${note.id}`);
-    console.log('Note pressed:', note.title);
+    router.push(`/note/${note.id}` as any);
   }, []);
 
   const handleNoteLongPress = useCallback((note: Note) => {
@@ -41,8 +41,7 @@ export default function NotesListScreen() {
   }, []);
 
   const handleCreateNote = useCallback(() => {
-    // router.push('/note/create');
-    console.log('Create new note');
+    router.push('/note/create' as any);
   }, []);
 
   const handleSearch = useCallback((query: string) => {

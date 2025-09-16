@@ -17,6 +17,7 @@ interface InputProps {
   keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'url';
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   autoCorrect?: boolean;
+  autoFocus?: boolean;
   secureTextEntry?: boolean;
   error?: string;
   disabled?: boolean;
@@ -39,6 +40,7 @@ export function Input({
   keyboardType = 'default',
   autoCapitalize = 'sentences',
   autoCorrect = true,
+  autoFocus = false,
   secureTextEntry = false,
   error,
   disabled = false,
@@ -110,6 +112,7 @@ export function Input({
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
+          autoFocus={autoFocus}
           secureTextEntry={secureTextEntry}
           editable={!disabled}
           onFocus={() => setIsFocused(true)}
