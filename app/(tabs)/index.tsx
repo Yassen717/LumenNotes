@@ -85,7 +85,7 @@ export default function NotesListScreen() {
     <ThemedView style={styles.container}>
       <View style={styles.header}>
         <ThemedText type="title" style={styles.headerTitle}>
-          Notes
+          My Notes
         </ThemedText>
         <SearchBar
           onSearch={handleSearch}
@@ -121,56 +121,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
   },
   headerTitle: {
-    marginBottom: 16,
+    marginBottom: 18,
+    fontSize: 32,
+    fontWeight: '700',
   },
   searchBar: {
-    marginBottom: 8,
+    marginBottom: 12,
   },
   listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 100, // Space for FAB
+    paddingHorizontal: 20,
+    paddingBottom: 120, // Space for FAB
+    paddingTop: 8,
   },
   noteCard: {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 64,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
   },
   emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
     textAlign: 'center',
   },
   emptyStateSubtitle: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: 'center',
     opacity: 0.7,
+    lineHeight: 22,
   },
   errorState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 64,
+    paddingVertical: 80,
+    paddingHorizontal: 32,
   },
   errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
     textAlign: 'center',
     color: 'red',
   },
   errorSubtitle: {
-    fontSize: 14,
+    fontSize: 16,
     textAlign: 'center',
     opacity: 0.7,
+    lineHeight: 22,
   },
 });

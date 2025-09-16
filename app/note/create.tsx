@@ -1,10 +1,9 @@
 /**
- * Note creation screen
+ * Note creation screen with improved UX and simplified UI
  */
 
 import { NoteEditor } from '@/components/notes/note-editor';
 import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui';
 import { useColors, useNotes } from '@/context';
 import { CreateNoteInput, UpdateNoteInput } from '@/types';
 import { Stack, router } from 'expo-router';
@@ -41,24 +40,16 @@ export default function CreateNoteScreen() {
         options={{
           title: 'New Note',
           headerShown: true,
-          headerLeft: () => (
-            <Button
-              title="Cancel"
-              variant="ghost"
-              size="small"
-              onPress={handleCancel}
-            />
-          ),
-          headerRight: () => (
-            <Button
-              title="Save"
-              variant="ghost"
-              size="small"
-              onPress={() => {
-                // This will be handled by the NoteEditor
-              }}
-            />
-          ),
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: '600',
+            color: colors.text,
+          },
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTintColor: colors.primary,
+          presentation: 'modal',
         }}
       />
       
@@ -66,6 +57,7 @@ export default function CreateNoteScreen() {
         onSave={handleSave}
         onCancel={handleCancel}
         autoFocus={true}
+        showActions={true}
         testID="create-note-editor"
       />
     </ThemedView>

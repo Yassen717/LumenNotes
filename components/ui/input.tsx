@@ -1,5 +1,5 @@
 /**
- * Basic input component with theme integration
+ * Enhanced input component with improved theme integration and styling
  */
 
 import React, { useState } from 'react';
@@ -55,7 +55,7 @@ export function Input({
   const colors = useColors();
 
   const getContainerStyle = (): ViewStyle => ({
-    marginBottom: 16,
+    marginBottom: 20,
     opacity: disabled ? 0.6 : 1,
   });
 
@@ -63,34 +63,43 @@ export function Input({
     flexDirection: 'row',
     alignItems: multiline ? 'flex-start' : 'center',
     backgroundColor: colors.surface,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: error ? colors.error : isFocused ? colors.primary : colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: multiline ? 12 : 10,
-    minHeight: multiline ? 80 : 44,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: multiline ? 14 : 12,
+    minHeight: multiline ? 100 : 48,
+    shadowColor: colors.text,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: isFocused ? 0.1 : 0.05,
+    shadowRadius: 2,
+    elevation: isFocused ? 2 : 1,
   });
 
   const getInputStyle = (): TextStyle => ({
     flex: 1,
     fontSize: 16,
+    lineHeight: 22,
     color: colors.text,
-    paddingLeft: leftIcon ? 8 : 0,
-    paddingRight: rightIcon ? 8 : 0,
+    paddingLeft: leftIcon ? 10 : 0,
+    paddingRight: rightIcon ? 10 : 0,
     textAlignVertical: multiline ? 'top' : 'center',
+    paddingTop: multiline ? 4 : 0,
   });
 
   const getLabelStyle = (): TextStyle => ({
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 6,
+    marginBottom: 8,
+    letterSpacing: 0.3,
   });
 
   const getErrorStyle = (): TextStyle => ({
-    fontSize: 12,
+    fontSize: 13,
     color: colors.error,
-    marginTop: 4,
+    marginTop: 6,
+    fontWeight: '500',
   });
 
   return (
@@ -98,12 +107,12 @@ export function Input({
       {label && <Text style={getLabelStyle()}>{label}</Text>}
       
       <View style={getInputContainerStyle()}>
-        {leftIcon && <View>{leftIcon}</View>}
+        {leftIcon && <View style={{ marginRight: 8 }}>{leftIcon}</View>}
         
         <TextInput
           style={[getInputStyle(), inputStyle]}
           placeholder={placeholder}
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={colors.textSecondary + '99'}
           value={value}
           onChangeText={onChangeText}
           multiline={multiline}
@@ -118,10 +127,15 @@ export function Input({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           testID={testID}
+          selectionColor={colors.primary}
         />
         
         {rightIcon && (
-          <TouchableOpacity onPress={onRightIconPress} disabled={!onRightIconPress}>
+          <TouchableOpacity 
+            onPress={onRightIconPress} 
+            disabled={!onRightIconPress}
+            style={{ marginLeft: 8, padding: 4 }}
+          >
             {rightIcon}
           </TouchableOpacity>
         )}

@@ -1,5 +1,5 @@
 /**
- * Note details screen - displays a single note with options to edit or delete
+ * Note details screen with improved layout and better UX
  */
 
 import { ThemedText } from '@/components/themed-text';
@@ -85,8 +85,17 @@ export default function NoteDetailsScreen() {
     <ThemedView style={styles.container}>
       <Stack.Screen
         options={{
-          title: note.title,
+          title: note.title.length > 25 ? note.title.substring(0, 25) + '...' : note.title,
           headerShown: true,
+          headerTitleStyle: {
+            fontSize: 16,
+            fontWeight: '600',
+            color: colors.text,
+          },
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTintColor: colors.primary,
           headerRight: () => (
             <View style={styles.headerButtons}>
               <Button
@@ -100,33 +109,55 @@ export default function NoteDetailsScreen() {
         }}
       />
       
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <ThemedText type="title" style={styles.title}>
-          {note.title}
-        </ThemedText>
+      <ScrollView 
+        style={styles.content} 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <View style={styles.titleSection}>
+          <ThemedText type="title" style={styles.title}>
+            {note.title}
+          </ThemedText>
+          {note.isPinned && (
+            <View style={[styles.pinBadge, { backgroundColor: colors.warning }]}>
+              <ThemedText style={styles.pinText}>Pinned</ThemedText>
+            </View>
+          )}
+        </View>
         
-        <View style={styles.metadata}>
-          <ThemedText style={styles.metadataText}>
-            Created: {formatDate(note.createdAt, 'absolute')}
-          </ThemedText>
-          <ThemedText style={styles.metadataText}>
-            Updated: {formatDate(note.updatedAt, 'relative')}
-          </ThemedText>
-          {note.category && (
+        <View style={[styles.metadata, { backgroundColor: colors.surface }]}>
+          <View style={styles.metadataRow}>
+            <ThemedText style={styles.metadataLabel}>Created:</ThemedText>
             <ThemedText style={styles.metadataText}>
-              Category: {note.category}
+              {formatDate(note.createdAt, 'absolute')}
             </ThemedText>
+          </View>
+          <View style={styles.metadataRow}>
+            <ThemedText style={styles.metadataLabel}>Modified:</ThemedText>
+            <ThemedText style={styles.metadataText}>
+              {formatDate(note.updatedAt, 'relative')}
+            </ThemedText>
+          </View>
+          {note.category && (
+            <View style={styles.metadataRow}>
+              <ThemedText style={styles.metadataLabel}>Category:</ThemedText>
+              <View style={[styles.categoryBadge, { backgroundColor: colors.primary + '20' }]}>
+                <ThemedText style={[styles.categoryText, { color: colors.primary }]}>
+                  {note.category}
+                </ThemedText>
+              </View>
+            </View>
           )}
         </View>
 
         {note.tags.length > 0 && (
           <View style={styles.tagsContainer}>
-            <ThemedText style={styles.tagsLabel}>Tags:</ThemedText>
+            <ThemedText style={styles.tagsLabel}>Tags</ThemedText>
             <View style={styles.tags}>
               {note.tags.map((tag, index) => (
-                <View key={index} style={[styles.tag, { backgroundColor: colors.primary + '20' }]}>
-                  <ThemedText style={[styles.tagText, { color: colors.primary }]}>
-                    {tag}
+                <View key={index} style={[styles.tag, { backgroundColor: colors.accent + '20' }]}>
+                  <ThemedText style={[styles.tagText, { color: colors.accent }]}>
+                    #{tag}
                   </ThemedText>
                 </View>
               ))}
@@ -134,24 +165,30 @@ export default function NoteDetailsScreen() {
           </View>
         )}
 
-        <ThemedText style={styles.content}>
-          {note.content || 'No content'}
-        </ThemedText>
+        <View style={styles.contentSection}>
+          <ThemedText style={styles.contentLabel}>Content</ThemedText>
+          <View style={[styles.contentBox, { backgroundColor: colors.surface }]}>
+            <ThemedText style={styles.noteContent}>
+              {note.content || 'No content'}
+            </ThemedText>
+          </View>
+        </View>
       </ScrollView>
 
-      <View style={styles.actions}>
+      <View style={[styles.actions, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
         <Button
-          title={note.isPinned ? 'Unpin' : 'Pin'}
+          title={note.isPinned ? 'Unpin Note' : 'Pin Note'}
           variant="outline"
           onPress={handleTogglePin}
           style={styles.actionButton}
+          icon={<ThemedText>📌</ThemedText>}
         />
         <Button
-          title="Delete"
-          variant="outline"
+          title="Delete Note"
+          variant="destructive"
           onPress={handleDelete}
-          style={StyleSheet.flatten([styles.actionButton, { borderColor: colors.error }])}
-          textStyle={{ color: colors.error }}
+          style={styles.actionButton}
+          icon={<ThemedText>🗑️</ThemedText>}
         />
       </View>
     </ThemedView>
@@ -164,29 +201,70 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+  },
+  contentContainer: {
+    paddingBottom: 20,
+  },
+  titleSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    marginBottom: 16,
   },
   title: {
-    marginBottom: 16,
+    flex: 1,
+    marginRight: 12,
+  },
+  pinBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  pinText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   metadata: {
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: 'rgba(0,0,0,0.05)',
-    borderRadius: 8,
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
-  metadataText: {
-    fontSize: 12,
-    opacity: 0.7,
-    marginBottom: 4,
+  metadataRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  tagsContainer: {
-    marginBottom: 16,
-  },
-  tagsLabel: {
+  metadataLabel: {
     fontSize: 14,
     fontWeight: '600',
-    marginBottom: 8,
+    opacity: 0.8,
+  },
+  metadataText: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  categoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  tagsContainer: {
+    marginBottom: 20,
+  },
+  tagsLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
   },
   tags: {
     flexDirection: 'row',
@@ -202,10 +280,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
   },
+  contentSection: {
+    marginBottom: 20,
+  },
+  contentLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  contentBox: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  noteContent: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
   actions: {
     flexDirection: 'row',
     padding: 16,
+    paddingBottom: 32,
     gap: 12,
+    borderTopWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
   },
   actionButton: {
     flex: 1,

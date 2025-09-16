@@ -2,12 +2,12 @@
  * Note editor component for creating and editing notes
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Keyboard, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useColors } from '../../context';
 import { CreateNoteInput, Note, UpdateNoteInput } from '../../types';
 import { validateAndSanitizeNote } from '../../utils';
-import { Input } from '../ui';
+import { Button, Input } from '../ui';
 
 interface NoteEditorProps {
   note?: Note;
@@ -16,6 +16,7 @@ interface NoteEditorProps {
   style?: StyleProp<ViewStyle>;
   autoFocus?: boolean;
   testID?: string;
+  showActions?: boolean; // Whether to show the save/cancel action bar
 }
 
 export function NoteEditor({
@@ -25,6 +26,7 @@ export function NoteEditor({
   style,
   autoFocus = true,
   testID,
+  showActions = true,
 }: NoteEditorProps) {
   const colors = useColors();
   const [title, setTitle] = useState(note?.title || '');
@@ -33,6 +35,8 @@ export function NoteEditor({
   const [tags, setTags] = useState(note?.tags.join(', ') || '');
   const [loading, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Track changes
   useEffect(() => {
@@ -44,6 +48,21 @@ export function NoteEditor({
     
     setHasChanges(hasContentChanges);
   }, [title, content, category, tags, note]);
+
+  // Keyboard visibility tracking
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardVisible(true);
+    });
+    const keyboardWillHide = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (!title.trim()) {
@@ -115,13 +134,37 @@ export function NoteEditor({
 
   const getContentStyle = (): ViewStyle => ({
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: showActions ? 100 : 16, // Space for action bar
+  });
+
+  const getActionBarStyle = (): ViewStyle => ({
+    position: 'absolute',
+    bottom: keyboardVisible ? 0 : 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: keyboardVisible ? 12 : 32, // Account for safe area
+    flexDirection: 'row',
+    gap: 12,
+    shadowColor: colors.text,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   });
 
   return (
     <View style={[getContainerStyle(), style]} testID={testID}>
-      <ScrollView 
+      <ScrollView
+        ref={scrollViewRef}
         style={getContentStyle()}
+        contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -133,6 +176,7 @@ export function NoteEditor({
           autoFocus={autoFocus}
           maxLength={200}
           testID="note-title-input"
+          style={styles.titleInput}
         />
 
         <Input
@@ -141,34 +185,75 @@ export function NoteEditor({
           value={content}
           onChangeText={setContent}
           multiline
-          numberOfLines={10}
+          numberOfLines={12}
           maxLength={100000}
           testID="note-content-input"
+          style={styles.contentInput}
         />
 
-        <Input
-          label="Category (Optional)"
-          placeholder="e.g., Personal, Work, Ideas..."
-          value={category}
-          onChangeText={setCategory}
-          maxLength={50}
-          testID="note-category-input"
-        />
+        <View style={styles.metadataSection}>
+          <Input
+            label="Category (Optional)"
+            placeholder="e.g., Personal, Work, Ideas..."
+            value={category}
+            onChangeText={setCategory}
+            maxLength={50}
+            testID="note-category-input"
+            style={styles.categoryInput}
+          />
 
-        <Input
-          label="Tags (Optional)"
-          placeholder="Separate tags with commas..."
-          value={tags}
-          onChangeText={setTags}
-          maxLength={200}
-          autoCapitalize="none"
-          testID="note-tags-input"
-        />
+          <Input
+            label="Tags (Optional)"
+            placeholder="Separate tags with commas..."
+            value={tags}
+            onChangeText={setTags}
+            maxLength={200}
+            autoCapitalize="none"
+            testID="note-tags-input"
+            style={styles.tagsInput}
+          />
+        </View>
       </ScrollView>
+      
+      {showActions && (
+        <View style={getActionBarStyle()}>
+          <Button
+            title="Cancel"
+            variant="outline"
+            onPress={handleCancel}
+            style={{ flex: 1 }}
+            disabled={loading}
+            testID="cancel-button"
+          />
+          <Button
+            title={loading ? 'Saving...' : 'Save Note'}
+            variant="primary"
+            onPress={handleSave}
+            style={{ flex: 2 }}
+            loading={loading}
+            disabled={!title.trim() || loading}
+            testID="save-button"
+          />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Additional styles if needed
+  titleInput: {
+    marginBottom: 20,
+  },
+  contentInput: {
+    marginBottom: 20,
+  },
+  metadataSection: {
+    marginTop: 8,
+  },
+  categoryInput: {
+    marginBottom: 16,
+  },
+  tagsInput: {
+    marginBottom: 8,
+  },
 });
