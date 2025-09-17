@@ -94,6 +94,12 @@ export function SearchBar({
     </View>
   );
 
+  const getLayoutIcon = () => (
+    <View style={{ padding: 4 }}>
+      <Text style={{ fontSize: 16, color: colors.textSecondary }}>☰</Text>
+    </View>
+  );
+
   const getClearIcon = () => (
     <TouchableOpacity onPress={handleClear} style={{ padding: 4 }}>
       <Text style={{ fontSize: 16, color: colors.textSecondary }}>✕</Text>
@@ -112,7 +118,7 @@ export function SearchBar({
         value={searchQuery}
         onChangeText={handleSearchChange}
         leftIcon={getSearchIcon()}
-        rightIcon={searchQuery.length > 0 ? getClearIcon() : undefined}
+        rightIcon={searchQuery.length > 0 ? getClearIcon() : getLayoutIcon()}
         testID={testID}
         autoCapitalize="none"
         autoCorrect={false}
