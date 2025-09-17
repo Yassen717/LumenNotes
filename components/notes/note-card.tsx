@@ -85,6 +85,16 @@ export function NoteCard({
     fontWeight: '600' as const,
   });
 
+  const getColorDotStyle = () => ({
+    position: 'absolute' as const,
+    bottom: 12,
+    right: 12,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: note.color || '#FF6B6B',
+  });
+
   const getPinIndicatorStyle = () => ({
     position: 'absolute' as const,
     top: 12,
@@ -98,6 +108,9 @@ export function NoteCard({
   const getCardStyle = (): ViewStyle => ({
     minHeight: 130,
     position: 'relative',
+    borderRadius: 12,
+    padding: 16,
+    backgroundColor: colors.surface,
     ...(note.color && {
       borderLeftWidth: 4,
       borderLeftColor: note.color,
@@ -130,6 +143,8 @@ export function NoteCard({
       <Text style={getTitleStyle()} numberOfLines={2}>
         {note.title}
       </Text>
+      
+      <View style={getColorDotStyle()} />
       
       {showPreview && note.content && (
         <Text style={getPreviewStyle()} numberOfLines={previewLines}>
