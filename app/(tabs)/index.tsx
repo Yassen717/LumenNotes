@@ -1,14 +1,14 @@
-import { router } from 'expo-router';
-import React, { useCallback, useState } from 'react';
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+﻿import { router } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 
-import { FAB } from '@/components/navigation/fab-button';
-import { NoteCard } from '@/components/notes/note-card';
-import { SearchBar } from '@/components/notes/search-bar';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useColors, useNotes } from '@/context';
-import { Note } from '@/types';
+import { FAB } from "@/components/navigation/fab-button";
+import { NoteCard } from "@/components/notes/note-card";
+import { SearchBar } from "@/components/notes/search-bar";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useColors, useNotes } from "@/context";
+import { Note } from "@/types";
 
 export default function NotesListScreen() {
   const {
@@ -37,11 +37,11 @@ export default function NotesListScreen() {
 
   const handleNoteLongPress = useCallback((note: Note) => {
     // TODO: Show context menu
-    console.log('Long press on note:', note.title);
+    console.log("Long press on note:", note.title);
   }, []);
 
   const handleCreateNote = useCallback(() => {
-    router.push('/note/create' as any);
+    router.push("/note/create" as any);
   }, []);
 
   const handleSearch = useCallback((query: string) => {
@@ -84,12 +84,18 @@ export default function NotesListScreen() {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="title" style={styles.headerTitle}>
-          My Notes
-        </ThemedText>
+        <View style={styles.headerTop}>
+          <ThemedText type="title" style={styles.headerTitle}>
+            Keep Note
+          </ThemedText>
+          <TouchableOpacity style={styles.profileButton}>
+            <View style={[styles.profileIcon, { backgroundColor: colors.textSecondary }]} />
+          </TouchableOpacity>
+        </View>
         <SearchBar
           onSearch={handleSearch}
           onClear={handleClearSearch}
+          placeholder="Search note..."
           style={styles.searchBar}
         />
       </View>
@@ -100,6 +106,8 @@ export default function NotesListScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -122,61 +130,82 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 12,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
   },
   headerTitle: {
-    marginBottom: 18,
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: "700",
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   searchBar: {
     marginBottom: 12,
   },
   listContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 120, // Space for FAB
+    paddingBottom: 100,
     paddingTop: 8,
   },
+  row: {
+    justifyContent: "space-between",
+  },
   noteCard: {
+    width: "48%",
     marginBottom: 16,
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 80,
     paddingHorizontal: 32,
   },
   emptyStateTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   emptyStateSubtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     opacity: 0.7,
     lineHeight: 22,
   },
   errorState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 80,
     paddingHorizontal: 32,
   },
   errorTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 12,
-    textAlign: 'center',
-    color: 'red',
+    textAlign: "center",
+    color: "red",
   },
   errorSubtitle: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     opacity: 0.7,
     lineHeight: 22,
   },
