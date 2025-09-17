@@ -27,15 +27,15 @@ export function FAB({
 
   const getFABStyle = (): ViewStyle => ({
     position: 'absolute',
-    bottom: 20,
-    right: 20,
+    bottom: 30,
+    alignSelf: 'center',
     width: size,
     height: size,
     borderRadius: size / 2,
-    backgroundColor: colors.primary,
+    backgroundColor: '#4285F4', // Blue color like in the image
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors.text,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
