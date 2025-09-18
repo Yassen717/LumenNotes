@@ -1,6 +1,7 @@
 ﻿import { router } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FAB } from "@/components/navigation/fab-button";
 import { NoteCard } from "@/components/notes/note-card";
@@ -21,6 +22,25 @@ export default function NotesListScreen() {
   } = useNotes();
   const colors = useColors();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  const headerContainerStyle = useMemo(() => {
+    return [
+      styles.header,
+      {
+        paddingTop: Math.max(insets.top, 0) + 20,
+      },
+    ];
+  }, [insets.top]);
+
+  const listContentContainerStyle = useMemo(() => {
+    return [
+      styles.listContainer,
+      {
+        paddingBottom: 100 + Math.max(insets.bottom, 0),
+      },
+    ];
+  }, [insets.bottom]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -82,8 +102,9 @@ export default function NotesListScreen() {
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <ThemedView>
+        <View style={headerContainerStyle}>
         <View style={styles.headerTop}>
           <ThemedText type="title" style={styles.headerTitle}>
             Keep Note
@@ -98,13 +119,13 @@ export default function NotesListScreen() {
           placeholder="Search note..."
           style={styles.searchBar}
         />
-      </View>
+        </View>
 
-      <FlatList
+        <FlatList
         data={filteredNotes.filter(note => !note.isDeleted)}
         renderItem={renderNote}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={listContentContainerStyle}
         showsVerticalScrollIndicator={false}
         numColumns={2}
         columnWrapperStyle={styles.row}
@@ -119,8 +140,9 @@ export default function NotesListScreen() {
         ListEmptyComponent={renderEmptyState}
       />
 
-      <FAB onPress={handleCreateNote} testID="create-note-fab" />
-    </ThemedView>
+        <FAB onPress={handleCreateNote} testID="create-note-fab" />
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 
@@ -130,7 +152,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 60,
     paddingBottom: 20,
   },
   headerTop: {
