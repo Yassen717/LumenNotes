@@ -103,7 +103,7 @@ export default function NotesListScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <ThemedView>
+      <ThemedView style={styles.container}>
         <View style={headerContainerStyle}>
         <View style={styles.headerTop}>
           <ThemedText type="title" style={styles.headerTitle}>
