@@ -109,7 +109,11 @@ export default function NotesListScreen() {
           <ThemedText type="title" style={styles.headerTitle}>
             Keep Note
           </ThemedText>
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity 
+            style={styles.profileButton}
+            onPress={() => router.push('/settings' as any)}
+            testID="settings-button"
+          >
             <View style={[styles.profileIcon, { backgroundColor: colors.textSecondary }]} />
           </TouchableOpacity>
         </View>
