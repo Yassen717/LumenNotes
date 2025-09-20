@@ -19,6 +19,12 @@ export default function TabLayout() {
           title: "Explore",
         }}
       />
+      <Stack.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+        }}
+      />
     </Stack>
   );
 }
