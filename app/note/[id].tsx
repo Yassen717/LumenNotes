@@ -5,7 +5,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui';
-import { useColors, useNotes } from '@/context';
+import { useNotes, useTheme } from '@/context';
 import { formatDate } from '@/utils';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback } from 'react';
@@ -14,7 +14,7 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 export default function NoteDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getNoteById, deleteNote, togglePinNote } = useNotes();
-  const colors = useColors();
+  const { theme: colors } = useTheme();
   
   const note = getNoteById(id);
 

@@ -4,7 +4,7 @@
 
 import { NoteEditor } from '@/components/notes/note-editor';
 import { ThemedView } from '@/components/themed-view';
-import { useColors, useNotes } from '@/context';
+import { useNotes, useTheme } from '@/context';
 import { CreateNoteInput, UpdateNoteInput } from '@/types';
 import { Stack, router } from 'expo-router';
 import React, { useCallback } from 'react';
@@ -12,7 +12,7 @@ import { Alert, StyleSheet } from 'react-native';
 
 export default function CreateNoteScreen() {
   const { createNote } = useNotes();
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const handleSave = useCallback(async (noteData: CreateNoteInput | UpdateNoteInput) => {
     try {
