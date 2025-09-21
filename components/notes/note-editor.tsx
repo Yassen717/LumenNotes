@@ -4,7 +4,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Keyboard, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { useColors } from '../../context';
+import { useTheme } from '../../context';
 import { CreateNoteInput, Note, UpdateNoteInput } from '../../types';
 import { validateAndSanitizeNote } from '../../utils';
 import { Button, Input } from '../ui';
@@ -28,7 +28,7 @@ export function NoteEditor({
   testID,
   showActions = true,
 }: NoteEditorProps) {
-  const colors = useColors();
+  const { theme: colors } = useTheme();
   const [title, setTitle] = useState(note?.title || '');
   const [content, setContent] = useState(note?.content || '');
   const [category, setCategory] = useState(note?.category || '');

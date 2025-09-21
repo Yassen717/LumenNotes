@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { StyleProp, Text, View, ViewStyle } from 'react-native';
-import { useColors } from '../../context';
+import { useTheme } from '../../context';
 import { Note } from '../../types';
 import { formatDate } from '../../utils';
 import { Card } from '../ui';
@@ -28,7 +28,7 @@ export function NoteCard({
   style,
   testID,
 }: NoteCardProps) {
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const getTitleStyle = () => ({
     fontSize: 17,

@@ -4,7 +4,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
-import { useColors } from '../../context';
+import { useTheme } from '../../context';
 import { Input } from '../ui';
 
 interface SearchBarProps {
@@ -30,7 +30,7 @@ export function SearchBar({
 }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestionsList, setShowSuggestionsList] = useState(false);
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
