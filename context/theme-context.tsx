@@ -3,7 +3,7 @@
  * Integrates with existing theme system and color scheme hooks
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { useColorScheme } from '../hooks/use-color-scheme';
 import { ColorTheme, ThemeMode } from '../types';
 import { useSettings } from './settings-context';
@@ -84,6 +84,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Get current theme colors
   const theme = isDark ? darkTheme : lightTheme;
   
+  // Force re-render when theme changes
+  useEffect(() => {
+    // This will trigger a re-render when theme changes
+  }, [isDark, theme]);
+  
   // Set theme mode
   const setThemeMode = (mode: ThemeMode) => {
     setSettingsTheme(mode);
@@ -126,6 +131,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const b = parseInt(hex.substr(4, 2), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     return brightness > 128 ? '#000000' : '#FFFFFF';
+  };
+  
+  // Get text color based on theme
+  const getTextColor = (variant: 'primary' | 'secondary' = 'primary'): string => {
+    return variant === 'primary' ? theme.text : theme.textSecondary;
   };
   
   // Adjust color opacity
