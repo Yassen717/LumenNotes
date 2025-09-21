@@ -1,98 +1,237 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+﻿import { router } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
+import { FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { FAB } from "@/components/navigation/fab-button";
+import { NoteCard } from "@/components/notes/note-card";
+import { SearchBar } from "@/components/notes/search-bar";
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useNotes, useTheme } from "@/context";
+import { Note } from "@/types";
 
-export default function HomeScreen() {
+export default function NotesListScreen() {
+  const {
+    filteredNotes,
+    loading,
+    error,
+    searchNotes,
+    clearFilters,
+    refreshNotes,
+  } = useNotes();
+  const { theme: colors } = useTheme();
+  const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  const headerContainerStyle = useMemo(() => {
+    return [
+      styles.header,
+      {
+        paddingTop: Math.max(insets.top, 0) + 20,
+      },
+    ];
+  }, [insets.top]);
+
+  const listContentContainerStyle = useMemo(() => {
+    return [
+      styles.listContainer,
+      {
+        paddingBottom: 100 + Math.max(insets.bottom, 0),
+      },
+    ];
+  }, [insets.bottom]);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await refreshNotes();
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshNotes]);
+
+  const handleNotePress = useCallback((note: Note) => {
+    router.push(`/note/${note.id}` as any);
+  }, []);
+
+  const handleNoteLongPress = useCallback((note: Note) => {
+    // TODO: Show context menu
+    console.log("Long press on note:", note.title);
+  }, []);
+
+  const handleCreateNote = useCallback(() => {
+    router.push("/note/create" as any);
+  }, []);
+
+  const handleSearch = useCallback((query: string) => {
+    searchNotes(query);
+  }, [searchNotes]);
+
+  const handleClearSearch = useCallback(() => {
+    clearFilters();
+  }, [clearFilters]);
+
+  const renderNote = useCallback(({ item }: { item: Note }) => (
+    <NoteCard
+      note={item}
+      onPress={() => handleNotePress(item)}
+      onLongPress={() => handleNoteLongPress(item)}
+      style={styles.noteCard}
+    />
+  ), [handleNotePress, handleNoteLongPress]);
+
+  const renderEmptyState = () => (
+    <ThemedView style={styles.emptyState}>
+      <ThemedText style={styles.emptyStateTitle}>No notes yet</ThemedText>
+      <ThemedText style={styles.emptyStateSubtitle}>
+        Tap the + button to create your first note
+      </ThemedText>
+    </ThemedView>
+  );
+
+  if (error) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.errorState}>
+          <ThemedText style={styles.errorTitle}>Error loading notes</ThemedText>
+          <ThemedText style={styles.errorSubtitle}>{error}</ThemedText>
+        </ThemedView>
+      </ThemedView>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <ThemedView style={styles.container}>
+        <View style={headerContainerStyle}>
+        <View style={styles.headerTop}>
+          <ThemedText type="title" style={styles.headerTitle}>
+            Keep Note
+          </ThemedText>
+          <TouchableOpacity 
+            style={styles.profileButton}
+            onPress={() => router.push('/settings' as any)}
+            testID="settings-button"
+          >
+            <View style={[styles.profileIcon, { backgroundColor: colors.textSecondary }]} />
+          </TouchableOpacity>
+        </View>
+        <SearchBar
+          onSearch={handleSearch}
+          onClear={handleClearSearch}
+          placeholder="Search note..."
+          style={styles.searchBar}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+        </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
+        <FlatList
+        data={filteredNotes.filter(note => !note.isDeleted)}
+        renderItem={renderNote}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={listContentContainerStyle}
+        showsVerticalScrollIndicator={false}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+          />
+        }
+        ListEmptyComponent={renderEmptyState}
+      />
+
+        <FAB onPress={handleCreateNote} testID="create-note-fab" />
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  header: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  profileIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  searchBar: {
+    marginBottom: 12,
+  },
+  listContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 100,
+    paddingTop: 8,
+  },
+  row: {
+    justifyContent: "space-between",
+  },
+  noteCard: {
+    width: "48%",
+    marginBottom: 16,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  emptyStateTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  emptyStateSubtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    opacity: 0.7,
+    lineHeight: 22,
+  },
+  errorState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 80,
+    paddingHorizontal: 32,
+  },
+  errorTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 12,
+    textAlign: "center",
+    color: "red",
+  },
+  errorSubtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    opacity: 0.7,
+    lineHeight: 22,
   },
 });

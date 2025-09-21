@@ -1,15 +1,15 @@
 import type { PropsWithChildren, ReactElement } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
-  interpolate,
-  useAnimatedRef,
-  useAnimatedStyle,
-  useScrollOffset,
+    interpolate,
+    useAnimatedRef,
+    useAnimatedStyle,
+    useScrollOffset,
 } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedView } from '@/components/themed-view';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTheme } from '@/context';
 
 const HEADER_HEIGHT = 250;
 
@@ -23,8 +23,10 @@ export default function ParallaxScrollView({
   headerImage,
   headerBackgroundColor,
 }: Props) {
-  const backgroundColor = useThemeColor({}, 'background');
-  const colorScheme = useColorScheme() ?? 'light';
+  const insets = useSafeAreaInsets();
+  const { theme, isDark } = useTheme();
+  const backgroundColor = theme.background;
+  const colorScheme = isDark ? 'dark' : 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
   const headerAnimatedStyle = useAnimatedStyle(() => {
@@ -57,7 +59,11 @@ export default function ParallaxScrollView({
         ]}>
         {headerImage}
       </Animated.View>
-      <ThemedView style={styles.content}>{children}</ThemedView>
+      <SafeAreaView edges={["bottom", "left", "right"]}>
+        <ThemedView style={[styles.content, { paddingBottom: styles.content.paddingBottom + Math.max(insets.bottom, 0) }]}>
+          {children}
+        </ThemedView>
+      </SafeAreaView>
     </Animated.ScrollView>
   );
 }
