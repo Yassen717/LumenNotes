@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { ActivityIndicator, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
-import { useColors, useThemedStyles } from '../../context';
+import { useTheme } from '../../context';
 
 interface ButtonProps {
   title: string;
@@ -35,8 +35,7 @@ export function Button({
   testID,
   hapticFeedback = true,
 }: ButtonProps) {
-  const themedStyles = useThemedStyles();
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const getButtonStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
@@ -122,7 +121,7 @@ export function Button({
       case 'ghost':
         return {
           ...baseStyle,
-          color: variant === 'ghost' ? colors.primary : colors.primary,
+          color: colors.primary,
         };
       default:
         return baseStyle;

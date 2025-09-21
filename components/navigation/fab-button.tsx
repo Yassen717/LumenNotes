@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { StyleProp, Text, TouchableOpacity, ViewStyle } from 'react-native';
-import { useColors } from '../../context';
+import { useTheme } from '../../context';
 
 interface FABProps {
   onPress: () => void;
@@ -23,7 +23,7 @@ export function FAB({
   style,
   testID,
 }: FABProps) {
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const getFABStyle = (): ViewStyle => ({
     position: 'absolute',
@@ -32,10 +32,10 @@ export function FAB({
     width: size,
     height: size,
     borderRadius: size / 2,
-    backgroundColor: '#4285F4', // Blue color like in the image
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.text,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

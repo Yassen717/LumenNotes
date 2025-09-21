@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { Text, TextInput, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
-import { useColors } from '../../context';
+import { useTheme } from '../../context';
 
 interface InputProps {
   label?: string;
@@ -52,7 +52,7 @@ export function Input({
   onRightIconPress,
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const getContainerStyle = (): ViewStyle => ({
     marginBottom: 20,

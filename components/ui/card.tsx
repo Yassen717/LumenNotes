@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
-import { useColors } from '../../context';
+import { useTheme } from '../../context';
 
 interface CardProps {
   children: React.ReactNode;
@@ -31,7 +31,7 @@ export function Card({
   variant = 'default',
   testID,
 }: CardProps) {
-  const colors = useColors();
+  const { theme: colors } = useTheme();
 
   const getCardStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
