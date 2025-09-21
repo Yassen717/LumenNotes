@@ -8,7 +8,7 @@ import { NoteCard } from "@/components/notes/note-card";
 import { SearchBar } from "@/components/notes/search-bar";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useColors, useNotes } from "@/context";
+import { useNotes, useTheme } from "@/context";
 import { Note } from "@/types";
 
 export default function NotesListScreen() {
@@ -20,7 +20,7 @@ export default function NotesListScreen() {
     clearFilters,
     refreshNotes,
   } = useNotes();
-  const colors = useColors();
+  const { theme: colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
 

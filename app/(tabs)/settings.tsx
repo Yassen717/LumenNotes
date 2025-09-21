@@ -9,10 +9,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useColors, useNotes, useSettings } from '@/context';
+import { useNotes, useSettings, useTheme } from '@/context';
 
 export default function SettingsScreen() {
-  const colors = useColors();
+  const { theme: colors } = useTheme();
   const { theme, toggleTheme } = useSettings();
   const themeMode = theme; // Use theme directly from settings
   const { getNotesStats, clearAllNotes } = useNotes();
