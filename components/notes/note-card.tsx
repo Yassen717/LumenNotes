@@ -50,6 +50,7 @@ export function NoteCard({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 'auto',
+    zIndex: 1,
   });
 
   const getDateStyle = () => ({
@@ -87,12 +88,13 @@ export function NoteCard({
 
   const getColorDotStyle = () => ({
     position: 'absolute' as const,
-    bottom: 12,
-    right: 12,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    bottom: 10,
+    left: 10,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: note.color || '#FF6B6B',
+    zIndex: 0,
   });
 
   const getPinIndicatorStyle = () => ({
@@ -106,10 +108,11 @@ export function NoteCard({
   });
 
   const getCardStyle = (): ViewStyle => ({
-    minHeight: 130,
+    minHeight: 135,
     position: 'relative',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 18,
+    padding: 14,
+    paddingBottom: 18,
     backgroundColor: colors.surface,
     ...(note.color && {
       borderLeftWidth: 4,
@@ -144,8 +147,6 @@ export function NoteCard({
         {note.title}
       </Text>
       
-      <View style={getColorDotStyle()} />
-      
       {showPreview && note.content && (
         <Text style={getPreviewStyle()} numberOfLines={previewLines}>
           {truncateText(note.content, previewLines)}
@@ -176,6 +177,8 @@ export function NoteCard({
           {formatDate(note.updatedAt, 'relative')}
         </Text>
       </View>
+      
+      <View style={getColorDotStyle()} />
     </Card>
   );
 }
