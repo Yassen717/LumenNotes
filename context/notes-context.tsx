@@ -192,6 +192,56 @@ const NotesContext = createContext<NotesContextType | undefined>(undefined);
 export function NotesProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(notesReducer, initialState);
 
+  // Helper to recompute filtered notes based on current filters/search/sort
+  const computeFilteredNotes = useCallback((notes: Note[]): Note[] => {
+    let filtered = [...notes];
+
+    // Apply search query
+    const query = state.searchQuery?.trim().toLowerCase();
+    if (query) {
+      filtered = filtered.filter(note =>
+        note.title.toLowerCase().includes(query) ||
+        note.content.toLowerCase().includes(query) ||
+        note.tags.some(tag => tag.toLowerCase().includes(query)) ||
+        (note.category && note.category.toLowerCase().includes(query))
+      );
+    }
+
+    // Apply category filter
+    if (state.selectedCategory) {
+      filtered = filtered.filter(note => note.category === state.selectedCategory);
+    }
+
+    // Apply tag filters (any-match)
+    if (state.selectedTags && state.selectedTags.length > 0) {
+      filtered = filtered.filter(note => state.selectedTags.some(tag => note.tags.includes(tag)));
+    }
+
+    // Sort
+    const sortField = state.sortBy || 'updatedAt';
+    const sortOrder = state.sortOrder || 'desc';
+    filtered.sort((a, b) => {
+      let aValue: any = (a as any)[sortField];
+      let bValue: any = (b as any)[sortField];
+
+      if (sortField === 'createdAt' || sortField === 'updatedAt') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      }
+      if (sortField === 'title') {
+        aValue = String(aValue).toLowerCase();
+        bValue = String(bValue).toLowerCase();
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      }
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+    });
+
+    return filtered;
+  }, [state.searchQuery, state.selectedCategory, state.selectedTags, state.sortBy, state.sortOrder]);
+
   // We'll implement these functions with the notes service
   const createNote = useCallback(async (input: CreateNoteInput): Promise<Note> => {
     try {
@@ -200,6 +250,9 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success && result.data) {
         dispatch({ type: 'ADD_NOTE', payload: result.data });
+        // Keep filteredNotes in sync
+        const newNotes = [result.data, ...state.notes];
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
         return result.data;
       } else {
         throw new Error(result.error || 'Failed to create note');
@@ -209,7 +262,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.notes, computeFilteredNotes]);
 
   const updateNote = useCallback(async (input: UpdateNoteInput): Promise<Note> => {
     try {
@@ -218,6 +271,9 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success && result.data) {
         dispatch({ type: 'UPDATE_NOTE', payload: result.data });
+        // Keep filteredNotes in sync
+        const newNotes = state.notes.map(n => n.id === result.data!.id ? result.data! : n);
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
         return result.data;
       } else {
         throw new Error(result.error || 'Failed to update note');
@@ -227,7 +283,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.notes, computeFilteredNotes]);
 
   const deleteNote = useCallback(async (id: string): Promise<void> => {
     try {
@@ -236,6 +292,9 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success) {
         dispatch({ type: 'DELETE_NOTE', payload: id });
+        // Keep filteredNotes in sync (soft delete)
+        const newNotes = state.notes.map(n => n.id === id ? { ...n, isDeleted: true } : n);
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
       } else {
         throw new Error(result.error || 'Failed to delete note');
       }
@@ -244,7 +303,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.notes, computeFilteredNotes]);
 
   const restoreNote = useCallback(async (id: string): Promise<void> => {
     try {
@@ -253,6 +312,8 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success) {
         dispatch({ type: 'RESTORE_NOTE', payload: id });
+        const newNotes = state.notes.map(n => n.id === id ? { ...n, isDeleted: false } : n);
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
       } else {
         throw new Error(result.error || 'Failed to restore note');
       }
@@ -261,7 +322,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.notes, computeFilteredNotes]);
 
   const togglePinNote = useCallback(async (id: string): Promise<void> => {
     try {
@@ -270,6 +331,8 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success) {
         dispatch({ type: 'TOGGLE_PIN_NOTE', payload: id });
+        const newNotes = state.notes.map(n => n.id === id ? { ...n, isPinned: !n.isPinned } : n);
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
       } else {
         throw new Error(result.error || 'Failed to toggle pin status');
       }
@@ -278,7 +341,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.notes, computeFilteredNotes]);
 
   const duplicateNote = useCallback(async (id: string): Promise<Note> => {
     try {
@@ -287,6 +350,8 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success && result.data) {
         dispatch({ type: 'ADD_NOTE', payload: result.data });
+        const newNotes = [result.data, ...state.notes];
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
         return result.data;
       } else {
         throw new Error(result.error || 'Failed to duplicate note');
@@ -296,14 +361,16 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       throw error;
     }
-  }, []);
+  }, [state.notes, computeFilteredNotes]);
 
   // Search and filtering functions
   const searchNotes = useCallback((query: string) => {
     dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
     
     if (!query.trim()) {
-      dispatch({ type: 'SET_FILTERED_NOTES', payload: state.notes });
+      // When clearing search, reflect current notes and filters
+      const recomputed = computeFilteredNotes(state.notes);
+      dispatch({ type: 'SET_FILTERED_NOTES', payload: recomputed });
       return;
     }
 
@@ -318,15 +385,19 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     });
 
     dispatch({ type: 'SET_FILTERED_NOTES', payload: filtered });
-  }, [state.notes]);
+  }, [state.notes, computeFilteredNotes]);
 
   const filterByCategory = useCallback((category: string | null) => {
     dispatch({ type: 'SET_CATEGORY_FILTER', payload: category });
-  }, []);
+    const recomputed = computeFilteredNotes(state.notes);
+    dispatch({ type: 'SET_FILTERED_NOTES', payload: recomputed });
+  }, [state.notes, computeFilteredNotes]);
 
   const filterByTags = useCallback((tags: string[]) => {
     dispatch({ type: 'SET_TAG_FILTER', payload: tags });
-  }, []);
+    const recomputed = computeFilteredNotes(state.notes);
+    dispatch({ type: 'SET_FILTERED_NOTES', payload: recomputed });
+  }, [state.notes, computeFilteredNotes]);
 
   const clearFilters = useCallback(() => {
     dispatch({ type: 'CLEAR_FILTERS' });
@@ -335,7 +406,9 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
   // Sorting and view
   const setSortOption = useCallback((sortBy: 'createdAt' | 'updatedAt' | 'title', sortOrder: 'asc' | 'desc') => {
     dispatch({ type: 'SET_SORT', payload: { sortBy, sortOrder } });
-  }, []);
+    const recomputed = computeFilteredNotes(state.notes);
+    dispatch({ type: 'SET_FILTERED_NOTES', payload: recomputed });
+  }, [state.notes, computeFilteredNotes]);
 
   const setViewMode = useCallback((mode: 'list' | 'grid') => {
     dispatch({ type: 'SET_VIEW_MODE', payload: mode });
@@ -351,7 +424,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       
       if (result.success && result.data) {
         dispatch({ type: 'SET_NOTES', payload: result.data });
-        dispatch({ type: 'SET_FILTERED_NOTES', payload: result.data });
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(result.data) });
       } else {
         throw new Error(result.error || 'Failed to load notes');
       }
@@ -361,7 +434,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, []);
+  }, [computeFilteredNotes]);
 
   const refreshNotes = useCallback(async (): Promise<void> => {
     await loadNotes();
