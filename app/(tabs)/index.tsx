@@ -1,4 +1,5 @@
-﻿import { router } from "expo-router";
+﻿import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -114,7 +115,7 @@ export default function NotesListScreen() {
             onPress={() => router.push('/settings' as any)}
             testID="settings-button"
           >
-            <View style={[styles.profileIcon, { backgroundColor: colors.textSecondary }]} />
+            <MaterialIcons name="settings" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
         <SearchBar
