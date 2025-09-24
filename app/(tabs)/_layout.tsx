@@ -11,6 +11,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Keep Note",
+          
+          
         }}
       />
       <Stack.Screen

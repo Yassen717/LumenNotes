@@ -2,8 +2,9 @@
  * Enhanced note card component with improved layout and styling
  */
 
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React from 'react';
-import { StyleProp, Text, View, ViewStyle } from 'react-native';
+import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { useTheme } from '../../context';
 import { Note } from '../../types';
 import { formatDate } from '../../utils';
@@ -13,6 +14,7 @@ interface NoteCardProps {
   note: Note;
   onPress: () => void;
   onLongPress?: () => void;
+  onToggleFavorite?: () => void;
   showPreview?: boolean;
   previewLines?: number;
   style?: StyleProp<ViewStyle>;
@@ -23,6 +25,7 @@ export function NoteCard({
   note,
   onPress,
   onLongPress,
+  onToggleFavorite,
   showPreview = true,
   previewLines = 3,
   style,
@@ -107,6 +110,16 @@ export function NoteCard({
     height: 6,
   });
 
+  const getFavoriteButtonContainer = (): ViewStyle => ({
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    zIndex: 2,
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: colors.surface + 'AA',
+  });
+
   const getCardStyle = (): ViewStyle => ({
     minHeight: 135,
     position: 'relative',
@@ -141,6 +154,21 @@ export function NoteCard({
       variant={note.isPinned ? 'filled' : 'default'}
       testID={testID}
     >
+      {onToggleFavorite && (
+        <TouchableOpacity
+          onPress={onToggleFavorite}
+          accessibilityLabel={note.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          style={getFavoriteButtonContainer()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          testID={`favorite-toggle-${note.id}`}
+        >
+          <MaterialIcons
+            name={note.isFavorite ? 'favorite' : 'favorite-border'}
+            size={18}
+            color={note.isFavorite ? colors.primary : colors.textSecondary}
+          />
+        </TouchableOpacity>
+      )}
       {note.isPinned && <View style={getPinIndicatorStyle()} />}
       
       <Text style={getTitleStyle()} numberOfLines={2}>

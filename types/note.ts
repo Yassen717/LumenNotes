@@ -20,6 +20,9 @@ export interface Note {
   /** Whether the note is pinned/favorited */
   isPinned: boolean;
   
+  /** Whether the note is marked as favorite */
+  isFavorite: boolean;
+  
   /** Optional category/tag for organization */
   category?: string;
   
@@ -55,6 +58,7 @@ export interface UpdateNoteInput {
   tags?: string[];
   color?: string;
   isPinned?: boolean;
+  isFavorite?: boolean;
   isDeleted?: boolean;
 }
 

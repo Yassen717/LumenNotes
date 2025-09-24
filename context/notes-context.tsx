@@ -34,6 +34,7 @@ type NotesAction =
   | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'RESTORE_NOTE'; payload: string }
   | { type: 'TOGGLE_PIN_NOTE'; payload: string }
+  | { type: 'TOGGLE_FAVORITE_NOTE'; payload: string }
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_FILTERED_NOTES'; payload: Note[] }
   | { type: 'SET_CATEGORY_FILTER'; payload: string | null }
@@ -52,6 +53,7 @@ interface NotesContextType extends NotesState {
   deleteNote: (id: string) => Promise<void>;
   restoreNote: (id: string) => Promise<void>;
   togglePinNote: (id: string) => Promise<void>;
+  toggleFavoriteNote: (id: string) => Promise<void>;
   duplicateNote: (id: string) => Promise<Note>;
   
   // Search and filtering
@@ -142,6 +144,14 @@ function notesReducer(state: NotesState, action: NotesAction): NotesState {
         ...state,
         notes: state.notes.map(note =>
           note.id === action.payload ? { ...note, isPinned: !note.isPinned } : note
+        ),
+      };
+      
+    case 'TOGGLE_FAVORITE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.map(note =>
+          note.id === action.payload ? { ...note, isFavorite: !note.isFavorite } : note
         ),
       };
       
@@ -343,6 +353,25 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state.notes, computeFilteredNotes]);
 
+  const toggleFavoriteNote = useCallback(async (id: string): Promise<void> => {
+    try {
+      dispatch({ type: 'SET_ERROR', payload: null });
+      const result = await NotesService.toggleFavoriteNote(id);
+      
+      if (result.success) {
+        dispatch({ type: 'TOGGLE_FAVORITE_NOTE', payload: id });
+        const newNotes = state.notes.map(n => n.id === id ? { ...n, isFavorite: !n.isFavorite } : n);
+        dispatch({ type: 'SET_FILTERED_NOTES', payload: computeFilteredNotes(newNotes) });
+      } else {
+        throw new Error(result.error || 'Failed to toggle favorite status');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to toggle favorite status';
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      throw error;
+    }
+  }, [state.notes, computeFilteredNotes]);
+
   const duplicateNote = useCallback(async (id: string): Promise<Note> => {
     try {
       dispatch({ type: 'SET_ERROR', payload: null });
@@ -488,6 +517,7 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
     deleteNote,
     restoreNote,
     togglePinNote,
+    toggleFavoriteNote,
     duplicateNote,
     searchNotes,
     filterByCategory,

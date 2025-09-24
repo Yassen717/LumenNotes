@@ -1,4 +1,5 @@
-﻿import { router } from "expo-router";
+﻿import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { router } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,9 +20,11 @@ export default function NotesListScreen() {
     searchNotes,
     clearFilters,
     refreshNotes,
+    toggleFavoriteNote,
   } = useNotes();
   const { theme: colors } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const insets = useSafeAreaInsets();
 
   const headerContainerStyle = useMemo(() => {
@@ -77,9 +80,10 @@ export default function NotesListScreen() {
       note={item}
       onPress={() => handleNotePress(item)}
       onLongPress={() => handleNoteLongPress(item)}
+      onToggleFavorite={() => toggleFavoriteNote(item.id)}
       style={styles.noteCard}
     />
-  ), [handleNotePress, handleNoteLongPress]);
+  ), [handleNotePress, handleNoteLongPress, toggleFavoriteNote]);
 
   const renderEmptyState = () => (
     <ThemedView style={styles.emptyState}>
@@ -114,7 +118,7 @@ export default function NotesListScreen() {
             onPress={() => router.push('/settings' as any)}
             testID="settings-button"
           >
-            <View style={[styles.profileIcon, { backgroundColor: colors.textSecondary }]} />
+            <MaterialIcons name="settings" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
         <SearchBar
@@ -123,10 +127,24 @@ export default function NotesListScreen() {
           placeholder="Search note..."
           style={styles.searchBar}
         />
+        <View style={styles.filtersRow}>
+          <TouchableOpacity
+            onPress={() => setFavoritesOnly(prev => !prev)}
+            style={[styles.favoritesToggle, favoritesOnly && { backgroundColor: colors.primary + '20', borderColor: colors.primary }]}
+            testID="favorites-toggle"
+          >
+            <MaterialIcons
+              name={favoritesOnly ? 'favorite' : 'favorite-border'}
+              size={18}
+              color={favoritesOnly ? colors.primary : colors.textSecondary}
+            />
+            <ThemedText style={[styles.favoritesToggleText, favoritesOnly && { color: colors.primary }]}>Favorites</ThemedText>
+          </TouchableOpacity>
+        </View>
         </View>
 
         <FlatList
-        data={filteredNotes.filter(note => !note.isDeleted)}
+        data={filteredNotes.filter(note => !note.isDeleted && (!favoritesOnly || note.isFavorite))}
         renderItem={renderNote}
         keyExtractor={(item) => item.id}
         contentContainerStyle={listContentContainerStyle}
@@ -182,6 +200,26 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     marginBottom: 12,
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  favoritesToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
+    borderRadius: 14,
+  },
+  favoritesToggleText: {
+    fontSize: 13,
+    opacity: 0.8,
   },
   listContainer: {
     paddingHorizontal: 20,
