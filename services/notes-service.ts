@@ -138,6 +138,8 @@ export class NotesService {
         ...note,
         createdAt: new Date(note.createdAt),
         updatedAt: new Date(note.updatedAt),
+        // Backward compatibility for older notes that don't have isFavorite
+        isFavorite: (note as any).isFavorite ?? false,
       }));
 
       return { success: true, data: processedNotes };
@@ -206,6 +208,7 @@ export class NotesService {
         createdAt: now,
         updatedAt: now,
         isPinned: false,
+        isFavorite: false,
         category: input.category,
         tags: input.tags || [],
         color: input.color,
@@ -391,6 +394,33 @@ export class NotesService {
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Failed to toggle pin status'
+      };
+    }
+  }
+
+  /**
+   * Toggle favorite status of a note
+   */
+  static async toggleFavoriteNote(id: string): Promise<ActionResult<Note>> {
+    try {
+      const notesResult = await this.loadNotes();
+      if (!notesResult.success) {
+        return { success: false, error: notesResult.error };
+      }
+
+      const existingNotes = notesResult.data || [];
+      const note = existingNotes.find(n => n.id === id);
+      if (!note) {
+        return { success: false, error: ERROR_MESSAGES.NOTE_NOT_FOUND };
+      }
+
+      const updateResult = await this.updateNote({ id, isFavorite: !note.isFavorite });
+      return updateResult;
+    } catch (error) {
+      console.error('Failed to toggle favorite note:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to toggle favorite status',
       };
     }
   }
