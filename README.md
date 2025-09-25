@@ -1,50 +1,122 @@
-# Welcome to your Expo app 👋
+# LumenNotes
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, cross-platform note-taking app built with Expo and React Native. LumenNotes focuses on simplicity, elegant design, and an offline-first experience.
 
-## Get started
+## Overview
 
-1. Install dependencies
+- **Platforms**: iOS, Android, Web (Expo)
+- **Routing**: Expo Router (file-based)
+- **Language**: TypeScript
+- **Storage**: AsyncStorage (local, offline-first)
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- Create, update, soft-delete, restore, and duplicate notes
+- Pin and favorite important notes
+- Search across title, content, tags, and category
+- Filter by category and tags; optional pinned-only view
+- Sort by created/updated date or title (asc/desc)
 
-   ```bash
-   npx expo start
-   ```
+## Tech Stack
 
-In the output, you'll find options to open the app in a
+- Expo `~54.0.1`, React `19.1.0`, React Native `0.81.4`
+- Expo Router `~6.0.0`
+- `@react-native-async-storage/async-storage` for persistence
+- `@expo/vector-icons` for icons
+- React Context + `useReducer` for state
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Project Structure
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+LumenNotes/
+├─ app/                 # Expo Router pages & layouts
+│  └─ (tabs)/
+│     └─ _layout.tsx
+├─ components/
+│  └─ notes/
+│     ├─ note-card.tsx
+│     └─ search-bar.tsx
+├─ context/
+│  └─ notes-context.tsx
+├─ services/
+│  └─ notes-service.ts
+├─ constants/
+├─ types/
+│  └─ note.ts
+├─ utils/
+├─ PLAN.md
+└─ package.json
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Getting Started
 
-## Learn more
+1) Install dependencies
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npm install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+2) Start the dev server
 
-## Join the community
+```bash
+npm run start
+# or
+npx expo start
+```
 
-Join our community of developers creating universal apps.
+3) Open the app from the Expo CLI UI on:
+- Development build
+- Android emulator
+- iOS simulator (macOS)
+- Expo Go (limited sandbox)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+> Windows users: Ensure Android SDK/emulator is installed for local Android runs.
+
+## NPM Scripts
+
+- `npm run start` — Start the Expo dev server
+- `npm run android` — Launch on Android
+- `npm run ios` — Launch on iOS (macOS required)
+- `npm run web` — Run the web build
+- `npm run lint` — Lint with Expo config
+- `npm run reset-project` — Reset the starter app structure
+
+## Development Notes
+
+- State is provided via `NotesProvider` with actions like `createNote`, `updateNote`, `deleteNote`, `togglePinNote`, `toggleFavoriteNote`, `duplicateNote`, plus search/filter/sort helpers.
+- Notes are persisted with AsyncStorage; keys live under `constants/storage-keys.ts`.
+- Theming utilities live under `constants/theme.ts` and are used by UI components in `components/`.
+
+## Building
+
+For production builds, use EAS (optional):
+
+```bash
+eas build -p android
+# or
+eas build -p ios
+```
+
+## License
+
+MIT License
+
+Copyright (c) 2023 Yassen Ibrahim
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
