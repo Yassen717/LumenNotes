@@ -4,17 +4,18 @@
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui';
+import { Button, useThemedAlert } from '@/components/ui';
 import { useNotes, useTheme } from '@/context';
 import { formatDate } from '@/utils';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
 import React, { useCallback } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 export default function NoteDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getNoteById, deleteNote, togglePinNote } = useNotes();
   const { theme: colors } = useTheme();
+  const { showAlert, AlertComponent } = useThemedAlert();
   
   const note = getNoteById(id);
 
@@ -28,7 +29,7 @@ export default function NoteDetailsScreen() {
   const handleDelete = useCallback(() => {
     if (!note) return;
     
-    Alert.alert(
+    showAlert(
       'Delete Note',
       'Are you sure you want to delete this note?',
       [
@@ -41,7 +42,7 @@ export default function NoteDetailsScreen() {
               await deleteNote(note.id);
               router.back();
             } catch (error) {
-              Alert.alert(
+              showAlert(
                 'Error',
                 error instanceof Error ? error.message : 'Failed to delete note'
               );
@@ -50,7 +51,7 @@ export default function NoteDetailsScreen() {
         },
       ]
     );
-  }, [note, deleteNote]);
+  }, [note, deleteNote, showAlert]);
 
   const handleTogglePin = useCallback(async () => {
     if (!note) return;
@@ -58,12 +59,12 @@ export default function NoteDetailsScreen() {
     try {
       await togglePinNote(note.id);
     } catch (error) {
-      Alert.alert(
+      showAlert(
         'Error',
         error instanceof Error ? error.message : 'Failed to update note'
       );
     }
-  }, [note, togglePinNote]);
+  }, [note, togglePinNote, showAlert]);
 
   if (!note) {
     return (
@@ -191,6 +192,8 @@ export default function NoteDetailsScreen() {
           icon={<ThemedText>🗑️</ThemedText>}
         />
       </View>
+      
+      <AlertComponent />
     </ThemedView>
   );
 }

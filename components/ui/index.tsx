@@ -6,7 +6,9 @@
 export * from './button';
 export * from './card';
 export * from './input';
+export * from './themed-alert';
 
 // Existing components
 export * from './collapsible';
 export * from './icon-symbol';
+

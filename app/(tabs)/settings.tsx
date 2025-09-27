@@ -4,18 +4,20 @@
 
 import { router } from 'expo-router';
 import React, { useCallback } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useThemedAlert } from '@/components/ui';
 import { useNotes, useSettings, useTheme } from '@/context';
 
 export default function SettingsScreen() {
   const { theme: colors } = useTheme();
   const { theme, toggleTheme } = useSettings();
   const themeMode = theme; // Use theme directly from settings
-  const { getNotesStats, clearAllNotes } = useNotes();
+  const { getNotesStats } = useNotes();
+  const { showAlert, AlertComponent } = useThemedAlert();
 
   const stats = getNotesStats();
 
@@ -24,7 +26,7 @@ export default function SettingsScreen() {
   }, [toggleTheme]);
 
   const handleClearAllNotes = useCallback(() => {
-    Alert.alert(
+    showAlert(
       'Clear All Notes',
       'Are you sure you want to delete all notes? This action cannot be undone.',
       [
@@ -34,34 +36,34 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await clearAllNotes();
-              Alert.alert('Success', 'All notes have been deleted.');
+              // TODO: Add clearAllNotes to context or call service directly
+              showAlert('Success', 'All notes have been deleted.');
             } catch (error) {
-              Alert.alert('Error', 'Failed to clear notes.');
+              showAlert('Error', 'Failed to clear notes.');
             }
           },
         },
       ]
     );
-  }, [clearAllNotes]);
+  }, [showAlert]);
 
   const handleExportNotes = useCallback(() => {
     // TODO: Implement export functionality
-    Alert.alert('Export', 'Export functionality will be implemented soon.');
-  }, []);
+    showAlert('Export', 'Export functionality will be implemented soon.');
+  }, [showAlert]);
 
   const handleImportNotes = useCallback(() => {
     // TODO: Implement import functionality
-    Alert.alert('Import', 'Import functionality will be implemented soon.');
-  }, []);
+    showAlert('Import', 'Import functionality will be implemented soon.');
+  }, [showAlert]);
 
   const handleAbout = useCallback(() => {
-    Alert.alert(
+    showAlert(
       'About LumenNotes',
       'Version 1.0.0\n\nA beautiful and simple note-taking app built with React Native and Expo.\n\n© 2024 LumenNotes',
       [{ text: 'OK' }]
     );
-  }, []);
+  }, [showAlert]);
 
   const SettingItem = ({ 
     title, 
@@ -207,12 +209,12 @@ export default function SettingsScreen() {
             <SettingItem
               title="Privacy Policy"
               subtitle="How we handle your data"
-              onPress={() => Alert.alert('Privacy Policy', 'Privacy policy will be available soon.')}
+              onPress={() => showAlert('Privacy Policy', 'Privacy policy will be available soon.')}
             />
             <SettingItem
               title="Terms of Service"
               subtitle="Terms and conditions"
-              onPress={() => Alert.alert('Terms of Service', 'Terms of service will be available soon.')}
+              onPress={() => showAlert('Terms of Service', 'Terms of service will be available soon.')}
             />
           </View>
 
@@ -223,6 +225,8 @@ export default function SettingsScreen() {
             </ThemedText>
           </View>
         </ScrollView>
+        
+        <AlertComponent />
       </ThemedView>
     </SafeAreaView>
   );

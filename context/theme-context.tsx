@@ -4,45 +4,20 @@
  */
 
 import React, { createContext, useContext, useEffect } from 'react';
+import { Colors } from '../constants/theme';
 import { useColorScheme } from '../hooks/use-color-scheme';
 import { ColorTheme, ThemeMode } from '../types';
 import { useSettings } from './settings-context';
 
 /**
- * Light theme colors
+ * Light theme colors - using Colors from constants
  */
-const lightTheme: ColorTheme = {
-  primary: '#3B82F6',
-  secondary: '#6366F1',
-  accent: '#F59E0B',
-  background: '#FFFFFF',
-  surface: '#F7F8FA',
-  text: '#0F172A',
-  textSecondary: '#6B7280',
-  border: '#E5E7EB',
-  error: '#FF3B30',
-  warning: '#FF9500',
-  success: '#34C759',
-  info: '#007AFF',
-};
+const lightTheme: ColorTheme = Colors.light as ColorTheme;
 
 /**
- * Dark theme colors
+ * Dark theme colors - using Colors from constants
  */
-const darkTheme: ColorTheme = {
-  primary: '#60A5FA',
-  secondary: '#818CF8',
-  accent: '#FBBF24',
-  background: '#0F172A',
-  surface: '#111827',
-  text: '#E5E7EB',
-  textSecondary: '#9CA3AF',
-  border: '#272B36',
-  error: '#FF453A',
-  warning: '#FF9F0A',
-  success: '#30D158',
-  info: '#64D2FF',
-};
+const darkTheme: ColorTheme = Colors.dark as ColorTheme;
 
 /**
  * Theme context interface
