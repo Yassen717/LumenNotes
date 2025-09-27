@@ -4,15 +4,17 @@
 
 import { NoteEditor } from '@/components/notes/note-editor';
 import { ThemedView } from '@/components/themed-view';
+import { useThemedAlert } from '@/components/ui';
 import { useNotes, useTheme } from '@/context';
 import { CreateNoteInput, UpdateNoteInput } from '@/types';
 import { Stack, router } from 'expo-router';
 import React, { useCallback } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export default function CreateNoteScreen() {
   const { createNote } = useNotes();
   const { theme: colors } = useTheme();
+  const { showAlert, AlertComponent } = useThemedAlert();
 
   const handleSave = useCallback(async (noteData: CreateNoteInput | UpdateNoteInput) => {
     try {
@@ -23,12 +25,12 @@ export default function CreateNoteScreen() {
       await createNote(noteData as CreateNoteInput);
       router.back();
     } catch (error) {
-      Alert.alert(
+      showAlert(
         'Error',
         error instanceof Error ? error.message : 'Failed to create note'
       );
     }
-  }, [createNote]);
+  }, [createNote, showAlert]);
 
   const handleCancel = useCallback(() => {
     router.back();
@@ -60,6 +62,8 @@ export default function CreateNoteScreen() {
         showActions={true}
         testID="create-note-editor"
       />
+      
+      <AlertComponent />
     </ThemedView>
   );
 }
