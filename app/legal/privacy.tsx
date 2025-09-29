@@ -14,7 +14,15 @@ export default function PrivacyPolicyScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <ThemedView style={styles.container}>
         {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: colors.surface,
+              shadowColor: '#000000',
+            },
+          ]}
+        >
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <ThemedText style={[styles.backButtonText, { color: colors.primary }]}>← Back</ThemedText>
           </TouchableOpacity>
@@ -123,8 +131,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
+    paddingVertical: 12,
+    // subtle shadow/elevation
+    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
   },
   backButton: { paddingVertical: 8, paddingHorizontal: 4 },
   backButtonText: { fontSize: 16, fontWeight: '600' },
