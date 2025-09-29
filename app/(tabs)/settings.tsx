@@ -234,7 +234,6 @@ export default function SettingsScreen() {
               onPress={handleClearAllNotes}
             />
           </View>
-
           {/* About */}
           <View style={styles.section}>
             <SectionHeader title="About" />
@@ -246,12 +245,12 @@ export default function SettingsScreen() {
             <SettingItem
               title="Privacy Policy"
               subtitle="How we handle your data"
-              onPress={() => showAlert('Privacy Policy', 'Privacy policy will be available soon.')}
+              onPress={() => router.push('/legal/privacy')}
             />
             <SettingItem
               title="Terms of Service"
               subtitle="Terms and conditions"
-              onPress={() => showAlert('Terms of Service', 'Terms of service will be available soon.')}
+              onPress={() => router.push('/legal/terms')}
             />
           </View>
 
