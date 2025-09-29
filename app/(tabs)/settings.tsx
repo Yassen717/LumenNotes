@@ -4,13 +4,14 @@
 
 import { router } from 'expo-router';
 import React, { useCallback } from 'react';
-import { ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Switch, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useThemedAlert } from '@/components/ui';
 import { useNotes, useSettings, useTheme } from '@/context';
+import { BackupService } from '@/services/backup-service';
 
 export default function SettingsScreen() {
   const { theme: colors } = useTheme();
@@ -47,9 +48,45 @@ export default function SettingsScreen() {
     );
   }, [showAlert]);
 
-  const handleExportNotes = useCallback(() => {
-    // TODO: Implement export functionality
-    showAlert('Export', 'Export functionality will be implemented soon.');
+  const handleExportNotes = useCallback(async () => {
+    try {
+      // Create a fresh manual backup, then export its JSON
+      const createRes = await BackupService.createBackup('manual');
+      if (!createRes.success || !createRes.data) {
+        throw new Error(createRes.error || 'Failed to create backup');
+      }
+
+      const exportRes = await BackupService.exportBackup(createRes.data.id);
+      if (!exportRes.success || !exportRes.data) {
+        throw new Error(exportRes.error || 'Failed to export backup');
+      }
+
+      const json = exportRes.data;
+      const fileName = `lumennotes-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+
+      if (Platform.OS === 'web') {
+        // Trigger download in web
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showAlert('Export complete', `Downloaded ${fileName}`);
+      } else {
+        // Native platforms: surface success, suggest enabling file saving/sharing
+        showAlert(
+          'Export ready',
+          'Backup JSON has been generated. To save/share the file directly on device, consider adding expo-file-system and expo-sharing.'
+        );
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Something went wrong exporting notes';
+      showAlert('Export failed', message);
+    }
   }, [showAlert]);
 
   const handleImportNotes = useCallback(() => {
@@ -180,7 +217,7 @@ export default function SettingsScreen() {
 
           {/* Data Management */}
           <View style={styles.section}>
-            <SectionHeader title="Data Management" />
+            <SectionHeader title="Data management" />
             <SettingItem
               title="Export Notes"
               subtitle="Export all notes to a file"
@@ -197,7 +234,6 @@ export default function SettingsScreen() {
               onPress={handleClearAllNotes}
             />
           </View>
-
           {/* About */}
           <View style={styles.section}>
             <SectionHeader title="About" />
@@ -209,12 +245,12 @@ export default function SettingsScreen() {
             <SettingItem
               title="Privacy Policy"
               subtitle="How we handle your data"
-              onPress={() => showAlert('Privacy Policy', 'Privacy policy will be available soon.')}
+              onPress={() => router.push('/legal/privacy')}
             />
             <SettingItem
               title="Terms of Service"
               subtitle="Terms and conditions"
-              onPress={() => showAlert('Terms of Service', 'Terms of service will be available soon.')}
+              onPress={() => router.push('/legal/terms')}
             />
           </View>
 
@@ -272,7 +308,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginBottom: 12,
-    textTransform: 'uppercase',
+    textTransform: 'none',
     letterSpacing: 0.5,
   },
   settingItem: {
