@@ -19,6 +19,9 @@ function RootLayoutContent() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          {/* Hide native headers for legal pages to use custom in-page headers */}
+          <Stack.Screen name="legal/privacy" options={{ headerShown: false }} />
+          <Stack.Screen name="legal/terms" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style={isDark ? 'light' : 'dark'} />
       </ThemeProvider>
