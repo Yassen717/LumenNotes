@@ -10,7 +10,7 @@ export default function TabLayout() {
       <Stack.Screen
         name="index"
         options={{
-          title: "Keep Note",
+          title: "Lumen Note",
           
           
         }}

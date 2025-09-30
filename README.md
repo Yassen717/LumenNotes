@@ -2,6 +2,8 @@
 
 A modern, cross-platform note-taking app built with Expo and React Native. LumenNotes focuses on simplicity, elegant design, and an offline-first experience.
 
+![LumenNotes App Screenshot](./assets/images/Note%20app.jpg)
+
 ## Overview
 
 - **Platforms**: iOS, Android, Web (Expo)

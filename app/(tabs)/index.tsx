@@ -11,6 +11,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useNotes, useTheme } from "@/context";
 import { Note } from "@/types";
+import { Text } from "react-native";
 
 export default function NotesListScreen() {
   const {
@@ -111,7 +112,7 @@ export default function NotesListScreen() {
         <View style={headerContainerStyle}>
         <View style={styles.headerTop}>
           <ThemedText type="title" style={styles.headerTitle}>
-            Keep Note
+             <Text style={styles.Title}>Lumen</Text> Note
           </ThemedText>
           <TouchableOpacity 
             style={styles.profileButton}
@@ -171,6 +172,9 @@ export default function NotesListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  Title: {
+    color:"#2196F3",
   },
   header: {
     paddingHorizontal: 20,
