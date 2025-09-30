@@ -88,10 +88,13 @@ export function ThemedAlert({
               )}
 
               {/* Buttons */}
-              <View style={styles.buttonContainer}>
+              <View style={[
+                styles.buttonContainer,
+                buttons.length === 1 && styles.singleButtonContainer
+              ]}>
                 {buttons.map((button, index) => {
                   const buttonStyle: ViewStyle = buttons.length === 1 
-                    ? { ...styles.button, ...styles.singleButton }
+                    ? styles.singleButton
                     : styles.button;
                   
                   return (
@@ -211,12 +214,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
+  singleButtonContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   button: {
     flex: 1,
   },
   singleButton: {
-    flex: 0,
-    minWidth: 100,
-    alignSelf: 'center',
+    minWidth: 120,
+    paddingHorizontal: 24,
   },
 });
