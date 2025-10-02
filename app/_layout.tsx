@@ -1,6 +1,8 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
+import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -11,7 +13,13 @@ export const unstable_settings = {
 };
 
 function RootLayoutContent() {
-  const { isDark } = useTheme();
+  const { isDark, theme } = useTheme();
+
+  // Update system UI colors when theme changes
+  useEffect(() => {
+    // Set the root background color to match theme
+    SystemUI.setBackgroundColorAsync(theme.background);
+  }, [theme.background]);
 
   return (
     <SafeAreaProvider>
@@ -23,7 +31,11 @@ function RootLayoutContent() {
           <Stack.Screen name="legal/privacy" options={{ headerShown: false }} />
           <Stack.Screen name="legal/terms" options={{ headerShown: false }} />
         </Stack>
-        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <StatusBar 
+          style={isDark ? 'light' : 'dark'} 
+          backgroundColor={theme.background}
+          translucent={false}
+        />
       </ThemeProvider>
     </SafeAreaProvider>
   );
