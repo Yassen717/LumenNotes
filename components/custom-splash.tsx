@@ -1,4 +1,5 @@
 import { useTheme } from '@/context';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, Platform, StyleSheet, View } from 'react-native';
@@ -21,6 +22,9 @@ export function CustomSplash({ onComplete }: CustomSplashProps) {
   const logoRotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Hide the native splash screen immediately
+    SplashScreen.hideAsync();
+    
     // Create animated sequence
     const animateSequence = Animated.sequence([
       // Initial fade in with scale
