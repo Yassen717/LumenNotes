@@ -21,8 +21,7 @@ export default function NoteDetailsScreen() {
 
   const handleEdit = useCallback(() => {
     if (note) {
-      // router.push(`/note/edit/${note.id}`);
-      console.log('Edit note:', note.title);
+      router.push(`/note/edit/${note.id}` as any);
     }
   }, [note]);
 
