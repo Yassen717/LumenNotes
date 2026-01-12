@@ -247,6 +247,7 @@ export class NotesService {
           createdAt: now,
           updatedAt: now,
           isPinned: false,
+          isFavorite: false,
           category: input.category,
           tags: input.tags || [],
           color: input.color,

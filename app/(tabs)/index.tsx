@@ -106,13 +106,23 @@ export default function NotesListScreen() {
     );
   }
 
+  if (loading) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedView style={styles.loadingState}>
+          <ThemedText style={styles.loadingText}>Loading notes...</ThemedText>
+        </ThemedView>
+      </ThemedView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ThemedView style={styles.container}>
         <View style={headerContainerStyle}>
         <View style={styles.headerTop}>
           <ThemedText type="title" style={styles.headerTitle}>
-             <Text style={styles.Title}>Lumen</Text> Note
+             <Text style={[styles.Title, { color: colors.primary }]}>Lumen</Text> Note
           </ThemedText>
           <TouchableOpacity 
             style={styles.profileButton}
@@ -174,7 +184,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   Title: {
-    color:"#2196F3",
+    fontWeight: "700",
   },
   header: {
     paddingHorizontal: 20,
@@ -275,5 +285,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     opacity: 0.7,
     lineHeight: 22,
+  },
+  loadingState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 80,
+  },
+  loadingText: {
+    fontSize: 16,
+    opacity: 0.7,
   },
 });
